@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checklist Mensual — TributaFácil.pe</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:        #F5F4F0;
+    --surface:   #FFFFFF;
+    --border:    #E2E0D8;
+    --border-md: #C8C5BA;
+    --text-1:    #1A1916;
+    --text-2:    #6B6860;
+    --text-3:    #A09D96;
+    --green-mid: #1D9E75;
+    --red:       #993C1D;
+    --kafka-accent:  #185FA5;
+    --factos-accent: #854F0B;
+    --carlos-accent: #3B6D11;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text-1); min-height: 100vh; padding: 2rem 1rem 4rem; }
+
+  .top-header { max-width: 820px; margin: 0 auto 2rem; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .brand-name { font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); font-family: 'DM Mono', monospace; }
+  .brand-title { font-size: 22px; font-weight: 600; color: var(--text-1); line-height: 1.2; }
+
+  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+  .sync-status { font-size: 11px; font-family: 'DM Mono', monospace; display: flex; align-items: center; gap: 5px; }
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-3); flex-shrink: 0; transition: background .3s; }
+  .sync-dot.ok      { background: var(--green-mid); }
+  .sync-dot.loading { background: #E9A825; animation: pulse 1s infinite; }
+  .sync-dot.error   { background: var(--red); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  .month-nav { display: flex; align-items: center; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 5px 8px; }
+  .month-nav button { background: transparent; border: none; cursor: pointer; color: var(--text-2); width: 28px; height: 28px; border-radius: var(--radius-sm); font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s; }
+  .month-nav button:hover { background: var(--bg); color: var(--text-1); }
+  .month-label { font-size: 14px; font-weight: 500; color: var(--text-1); min-width: 160px; text-align: center; font-family: 'DM Mono', monospace; }
+
+  .tabs-wrapper { max-width: 820px; margin: 0 auto; }
+  .tab-bar { display: flex; gap: 4px; margin-bottom: -1px; position: relative; z-index: 1; }
+  .tab-btn { background: var(--surface); border: 1px solid var(--border); border-bottom: 1px solid var(--border); border-radius: var(--radius-md) var(--radius-md) 0 0; padding: 10px 22px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: var(--text-2); cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 8px; }
+  .tab-btn:hover { color: var(--text-1); background: var(--bg); }
+  .tab-btn.active { color: var(--text-1); border-bottom-color: var(--surface); z-index: 2; }
+  .tab-btn.active.kafka  { border-top: 2px solid var(--kafka-accent); }
+  .tab-btn.active.factos { border-top: 2px solid var(--factos-accent); }
+  .tab-btn.active.carlos { border-top: 2px solid var(--carlos-accent); }
+  .tab-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .kafka  .tab-dot { background: var(--kafka-accent); }
+  .factos .tab-dot { background: var(--factos-accent); }
+  .carlos .tab-dot { background: var(--carlos-accent); }
+
+  .tab-panel { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 0 var(--radius-lg) var(--radius-lg) var(--radius-lg); padding: 1.75rem; animation: fadeIn .2s ease; }
+  .tab-panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  .summary-strip { display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 12px; margin-bottom: 1.5rem; align-items: center; }
+  .stat { background: var(--bg); border-radius: var(--radius-md); padding: .6rem 1rem; text-align: center; }
+  .stat-n { font-size: 20px; font-weight: 600; color: var(--text-1); font-family: 'DM Mono', monospace; }
+  .stat-l { font-size: 11px; color: var(--text-3); margin-top: 1px; text-transform: uppercase; letter-spacing: .05em; }
+  .stat-n.green { color: var(--green-mid); }
+  .stat-n.red   { color: var(--red); }
+  .progress-wrap { display: flex; flex-direction: column; gap: 5px; align-items: flex-end; min-width: 80px; }
+  .pct-label { font-size: 11px; color: var(--text-3); font-family: 'DM Mono', monospace; font-weight: 500; }
+  .pbar-bg { width: 80px; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .pbar-fill { height: 6px; background: var(--green-mid); border-radius: 3px; transition: width .4s ease; }
+
+  .section { margin-bottom: 1.5rem; }
+  .section:last-child { margin-bottom: 0; }
+  .section-header { display: flex; align-items: center; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+  .section-icon { font-size: 15px; }
+  .section-name { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--text-2); flex: 1; }
+  .sec-badge { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-3); background: var(--bg); padding: 1px 7px; border-radius: 10px; border: 1px solid var(--border); }
+
+  .task { display: flex; align-items: center; gap: 12px; padding: 9px 10px; border-radius: var(--radius-sm); cursor: pointer; transition: background .12s, opacity .2s; border: 1px solid transparent; user-select: none; }
+  .task:hover { background: var(--bg); }
+  .task.done { opacity: .5; }
+  .task.done .task-name { text-decoration: line-through; color: var(--text-3); }
+  .task.saving { opacity: .6; pointer-events: none; }
+  .cb { width: 19px; height: 19px; border-radius: 5px; border: 1.5px solid var(--border-md); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .15s; background: var(--surface); font-size: 12px; color: transparent; }
+  .task.done .cb { background: var(--green-mid); border-color: var(--green-mid); color: #fff; }
+  .task-name { font-size: 13.5px; flex: 1; color: var(--text-1); line-height: 1.4; }
+  .task-due { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-3); white-space: nowrap; }
+  .task-due.urgent { color: var(--red); font-weight: 500; }
+
+  /* Config banner */
+  .config-banner { max-width: 820px; margin: 0 auto 1.5rem; background: #FAEEDA; border: 1px solid #F5C4B3; border-radius: var(--radius-md); padding: 1rem 1.25rem; display: flex; align-items: flex-start; gap: 12px; }
+  .config-banner.hidden { display: none; }
+  .config-icon { font-size: 18px; flex-shrink: 0; }
+  .config-text { flex: 1; font-size: 13px; color: #4A2008; line-height: 1.6; }
+  .config-text strong { font-weight: 600; }
+  .config-input-row { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .config-input { flex: 1; min-width: 200px; padding: 7px 10px; border: 1px solid var(--border-md); border-radius: var(--radius-sm); font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-1); background: var(--surface); }
+  .config-btn { padding: 7px 16px; background: #854F0B; color: #fff; border: none; border-radius: var(--radius-sm); font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+  .config-btn:hover { background: #633806; }
+
+  .footer { max-width: 820px; margin: 2rem auto 0; text-align: center; font-size: 11px; color: var(--text-3); font-family: 'DM Mono', monospace; }
+  .legal-note { font-size: 10px; color: var(--text-3); margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<!-- CONFIG BANNER -->
+<div class="config-banner" id="config-banner">
+  <span class="config-icon">☁️</span>
+  <div class="config-text">
+    <strong>Conectar con Google Sheets</strong> — Pega aquí la URL de tu Google Apps Script Web App para activar la sincronización en la nube. Una vez conectado, los checks se guardan y se leen desde tu Google Sheet en todos tus dispositivos.
+    <div class="config-input-row">
+      <input class="config-input" id="script-url-input" type="text" placeholder="https://script.google.com/macros/s/XXXXX/exec" />
+      <button class="config-btn" onclick="guardarScriptUrl()">Conectar</button>
+    </div>
+  </div>
+</div>
+
+<div class="top-header">
+  <div class="brand">
+    <span class="brand-name">TributaFácil.pe</span>
+    <span class="brand-title">Checklist de compromisos mensuales</span>
+  </div>
+  <div class="header-right">
+    <div class="sync-status">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-label" style="color:var(--text-3)">Sin configurar</span>
+    </div>
+    <div class="month-nav">
+      <button id="prev" title="Mes anterior">&#8249;</button>
+      <span class="month-label" id="month-label"></span>
+      <button id="next" title="Mes siguiente">&#8250;</button>
+    </div>
+  </div>
+</div>
+
+<div class="tabs-wrapper">
+  <div class="tab-bar">
+    <button class="tab-btn kafka active" data-tab="kafka"><span class="tab-dot"></span>Kafka Comunicaciones</button>
+    <button class="tab-btn factos" data-tab="factos"><span class="tab-dot"></span>Factos Media</button>
+    <button class="tab-btn carlos" data-tab="carlos"><span class="tab-dot"></span>Carlos Orozco</button>
+  </div>
+
+  <!-- KAFKA -->
+  <div class="tab-panel active" id="panel-kafka">
+    <div class="summary-strip">
+      <div class="stat"><div class="stat-n" id="k-total">0</div><div class="stat-l">Total</div></div>
+      <div class="stat"><div class="stat-n green" id="k-done">0</div><div class="stat-l">Hechas</div></div>
+      <div class="stat"><div class="stat-n red" id="k-pend">0</div><div class="stat-l">Pendientes</div></div>
+      <div class="progress-wrap">
+        <span class="pct-label" id="k-pct">0%</span>
+        <div class="pbar-bg"><div class="pbar-fill" id="k-pbar" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="section" id="k-sec-gen"></div>
+    <div class="section" id="k-sec-decl"></div>
+    <div class="section" id="k-sec-fin"></div>
+  </div>
+
+  <!-- FACTOS -->
+  <div class="tab-panel" id="panel-factos">
+    <div class="summary-strip">
+      <div class="stat"><div class="stat-n" id="f-total">0</div><div class="stat-l">Total</div></div>
+      <div class="stat"><div class="stat-n green" id="f-done">0</div><div class="stat-l">Hechas</div></div>
+      <div class="stat"><div class="stat-n red" id="f-pend">0</div><div class="stat-l">Pendientes</div></div>
+      <div class="progress-wrap">
+        <span class="pct-label" id="f-pct">0%</span>
+        <div class="pbar-bg"><div class="pbar-fill" id="f-pbar" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="section" id="f-sec-gen"></div>
+    <div class="section" id="f-sec-decl"></div>
+    <div class="section" id="f-sec-fin"></div>
+  </div>
+
+  <!-- CARLOS -->
+  <div class="tab-panel" id="panel-carlos">
+    <div class="summary-strip">
+      <div class="stat"><div class="stat-n" id="c-total">0</div><div class="stat-l">Total</div></div>
+      <div class="stat"><div class="stat-n green" id="c-done">0</div><div class="stat-l">Hechas</div></div>
+      <div class="stat"><div class="stat-n red" id="c-pend">0</div><div class="stat-l">Pendientes</div></div>
+      <div class="progress-wrap">
+        <span class="pct-label" id="c-pct">0%</span>
+        <div class="pbar-bg"><div class="pbar-fill" id="c-pbar" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="section" id="c-sec-decl"></div>
+  </div>
+</div>
+
+<div class="footer">
+  <div id="footer-date"></div>
+  <div class="legal-note">Fechas SUNAT según R.S. 281-2022/SUNAT · Verificar en sunat.gob.pe ante cualquier modificación</div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  CONFIGURACIÓN DE SCRIPT URL
+// ══════════════════════════════════════════════
+const URL_KEY = 'ctf_script_url';
+
+function getScriptUrl() { return localStorage.getItem(URL_KEY) || ''; }
+
+function guardarScriptUrl() {
+  const val = document.getElementById('script-url-input').value.trim();
+  if (!val.startsWith('https://script.google.com')) {
+    alert('La URL debe comenzar con https://script.google.com'); return;
+  }
+  localStorage.setItem(URL_KEY, val);
+  document.getElementById('config-banner').classList.add('hidden');
+  setSyncStatus('loading', 'Conectando...');
+  renderAll();
+}
+
+function setSyncStatus(estado, texto) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  dot.className = 'sync-dot ' + estado;
+  lbl.textContent = texto;
+}
+
+// ══════════════════════════════════════════════
+//  CRONOGRAMA SUNAT 2026 (R.S. 281-2022/SUNAT)
+// ══════════════════════════════════════════════
+const CRONOGRAMA_2026 = {
+  0:  {"0":"16 Feb","1":"17 Feb","23":"18 Feb","45":"19 Feb","67":"20 Feb","89":"23 Feb"},
+  1:  {"0":"16 Mar","1":"17 Mar","23":"18 Mar","45":"19 Mar","67":"20 Mar","89":"23 Mar"},
+  2:  {"0":"17 Abr","1":"20 Abr","23":"21 Abr","45":"22 Abr","67":"23 Abr","89":"24 Abr"},
+  3:  {"0":"18 May","1":"19 May","23":"20 May","45":"21 May","67":"22 May","89":"25 May"},
+  4:  {"0":"15 Jun","1":"16 Jun","23":"17 Jun","45":"18 Jun","67":"19 Jun","89":"22 Jun"},
+  5:  {"0":"15 Jul","1":"16 Jul","23":"17 Jul","45":"20 Jul","67":"21 Jul","89":"22 Jul"},
+  6:  {"0":"18 Ago","1":"19 Ago","23":"20 Ago","45":"21 Ago","67":"24 Ago","89":"25 Ago"},
+  7:  {"0":"15 Set","1":"16 Set","23":"17 Set","45":"18 Set","67":"21 Set","89":"22 Set"},
+  8:  {"0":"16 Oct","1":"19 Oct","23":"20 Oct","45":"21 Oct","67":"22 Oct","89":"23 Oct"},
+  9:  {"0":"16 Nov","1":"17 Nov","23":"18 Nov","45":"19 Nov","67":"20 Nov","89":"23 Nov"},
+  10: {"0":"17 Dic","1":"18 Dic","23":"21 Dic","45":"22 Dic","67":"23 Dic","89":"24 Dic"},
+  11: {"0":"18 Ene'27","1":"19 Ene'27","23":"20 Ene'27","45":"21 Ene'27","67":"22 Ene'27","89":"25 Ene'27"}
+};
+const RUC_GRUPO = {0:"0",1:"1",2:"23",3:"23",4:"45",5:"45",6:"67",7:"67",8:"89",9:"89"};
+const CLIENTS_META = { k:{digito:6}, f:{digito:1}, c:{digito:3} };
+
+function fecDJ(cid, mes) {
+  const g = RUC_GRUPO[CLIENTS_META[cid].digito];
+  return (CRONOGRAMA_2026[mes] || {})[g] || '—';
+}
+function quintoDiaHabil(year, mes) {
+  const sigMes = mes + 1 > 11 ? 0 : mes + 1;
+  const sigYear = mes + 1 > 11 ? year + 1 : year;
+  let h = 0, d = 1;
+  while (true) {
+    const dow = new Date(sigYear, sigMes, d).getDay();
+    if (dow !== 0 && dow !== 6 && ++h === 5)
+      return String(d).padStart(2,'0') + '/' + String(sigMes+1).padStart(2,'0') + '/' + sigYear;
+    d++;
+  }
+}
+function fecFinanzas(cid, mes) {
+  const raw = fecDJ(cid, mes);
+  if (raw === '—') return '—';
+  const mMap = {Ene:0,Feb:1,Mar:2,Abr:3,May:4,Jun:5,Jul:6,Ago:7,Set:8,Oct:9,Nov:10,Dic:11};
+  const p = raw.replace("'27","").split(" ");
+  const base = new Date(raw.includes("'27")?2027:2026, mMap[p[1]], parseInt(p[0]));
+  base.setDate(base.getDate() + 7);
+  return String(base.getDate()).padStart(2,'0')+'/'+String(base.getMonth()+1).padStart(2,'0')+'/'+base.getFullYear();
+}
+
+// ══════════════════════════════════════════════
+//  TAREAS
+// ══════════════════════════════════════════════
+const GEN_TASKS    = (cid,mes) => { const f=quintoDiaHabil(currentYear,mes); return [
+  {id:"gen1",name:"Descargar Compras y Ventas (SIRE)",    due:f},
+  {id:"gen2",name:"Verificar Detracciones a Proveedores", due:f},
+  {id:"gen3",name:"Verificar Detracciones Ventas",         due:f},
+  {id:"gen4",name:"Declaraciones AFP Net",                 due:f, urgent:true},
+];};
+const DECL_KF      = (cid,mes) => { const f=fecDJ(cid,mes); return [
+  {id:"dec1",name:"Envío SIRE — RVIE y RCE", due:f},
+  {id:"dec2",name:"PLAME — PDT 601",         due:f, urgent:true},
+  {id:"dec4",name:"PDT 621 — IGV & Renta",  due:f, urgent:true},
+];};
+const DECL_CARLOS  = (cid,mes) => { const f=fecDJ(cid,mes); return [
+  {id:"cdec1",name:"Envío SIRE — RVIE y RCE", due:f},
+  {id:"cdec2",name:"Rentas 1ra Cat.",          due:f},
+  {id:"cdec3",name:"PDT 621 — IGV & Renta",   due:f, urgent:true},
+];};
+const FIN_KAFKA    = (cid,mes) => { const f=fecFinanzas(cid,mes); return [
+  {id:"kfin1",name:"Conciliación bancaria",               due:f},
+  {id:"kfin2",name:"Flujo de caja mensual",               due:f},
+  {id:"kfin3",name:"Consolidado recibos por honorarios",   due:f},
+  {id:"kfin4",name:"Matching compras — estado de cuenta",  due:f},
+  {id:"kfin5",name:"Estado de resultados acumulado",       due:f},
+  {id:"kfin6",name:"Flujo de Efectivo",                   due:f},
+];};
+const FIN_FACTOS   = (cid,mes) => { const f=fecFinanzas(cid,mes); return [
+  {id:"ffin1",name:"Conciliación bancaria",               due:f},
+  {id:"ffin2",name:"Revisión centros de costo CC 92/94/95",due:f},
+  {id:"ffin3",name:"Segmentación ingresos LaRoro.pe",      due:f},
+  {id:"ffin4",name:"Estado de resultados mensual",         due:f},
+  {id:"ffin5",name:"Flujo de caja operativo",              due:f},
+  {id:"ffin6",name:"Flujo de Efectivo",                   due:f},
+];};
+
+const CLIENTS = [
+  { id:"k", sections:[
+    {id:"k-sec-gen", icon:"📋",label:"Obligaciones Generales",      tasksFn:GEN_TASKS},
+    {id:"k-sec-decl",icon:"📄",label:"Declaraciones Determinativas", tasksFn:DECL_KF},
+    {id:"k-sec-fin", icon:"💼",label:"Finanzas",                     tasksFn:FIN_KAFKA},
+  ]},
+  { id:"f", sections:[
+    {id:"f-sec-gen", icon:"📋",label:"Obligaciones Generales",      tasksFn:GEN_TASKS},
+    {id:"f-sec-decl",icon:"📄",label:"Declaraciones Determinativas", tasksFn:DECL_KF},
+    {id:"f-sec-fin", icon:"💼",label:"Finanzas",                     tasksFn:FIN_FACTOS},
+  ]},
+  { id:"c", sections:[
+    {id:"c-sec-decl",icon:"📄",label:"Declaraciones Determinativas", tasksFn:DECL_CARLOS},
+  ]},
+];
+
+// ══════════════════════════════════════════════
+//  ESTADO EN MEMORIA + CACHÉ LOCAL
+// ══════════════════════════════════════════════
+let cloudState = {};   // { "k_2026_4_gen1": true, ... }
+
+function stateKey(cid, y, m, tid) { return `${cid}_${y}_${m}_${tid}`; }
+
+function getCached() {
+  try { const d = localStorage.getItem('ctf_cloud_state'); return d ? JSON.parse(d) : {}; }
+  catch(e) { return {}; }
+}
+function setCached(s) {
+  try { localStorage.setItem('ctf_cloud_state', JSON.stringify(s)); } catch(e) {}
+}
+
+// ══════════════════════════════════════════════
+//  COMUNICACIÓN CON APPS SCRIPT
+// ══════════════════════════════════════════════
+let loadingPeriod = false;
+
+async function cargarPeriodo(y, m) {
+  const url = getScriptUrl();
+  if (!url) return;
+  setSyncStatus('loading','Cargando...');
+  try {
+    const r = await fetch(`${url}?action=get&year=${y}&month=${m}`, {mode:'cors'});
+    const data = await r.json();
+    // data = { "k_2026_4_gen1": true, ... }
+    Object.assign(cloudState, data);
+    setCached(cloudState);
+    setSyncStatus('ok','Sincronizado ✓');
+  } catch(e) {
+    // Si falla red, usamos caché local
+    cloudState = getCached();
+    setSyncStatus('error','Sin conexión — caché local');
+  }
+  CLIENTS.forEach(c => renderClient(c));
+  bindTasks();
+}
+
+async function guardarCheck(cid, y, m, tid, valor) {
+  const key = stateKey(cid, y, m, tid);
+  cloudState[key] = valor;
+  setCached(cloudState);
+  const url = getScriptUrl();
+  if (!url) return;
+  setSyncStatus('loading','Guardando...');
+  try {
+    await fetch(`${url}?action=set&key=${encodeURIComponent(key)}&value=${valor}`, {mode:'cors'});
+    setSyncStatus('ok','Guardado ✓');
+  } catch(e) {
+    setSyncStatus('error','Error al guardar — guardado local');
+  }
+}
+
+// ══════════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════════
+let currentYear  = new Date().getFullYear();
+let currentMonth = new Date().getMonth();
+
+function renderClient(client) {
+  let total = 0, done = 0;
+  client.sections.forEach(sec => {
+    const el = document.getElementById(sec.id);
+    if (!el) return;
+    const tasks    = sec.tasksFn(client.id, currentMonth);
+    const secDone  = tasks.filter(t => cloudState[stateKey(client.id,currentYear,currentMonth,t.id)]).length;
+    total += tasks.length; done += secDone;
+    el.innerHTML = `
+      <div class="section-header">
+        <span class="section-icon">${sec.icon}</span>
+        <span class="section-name">${sec.label}</span>
+        <span class="sec-badge">${secDone}/${tasks.length}</span>
+      </div>
+      ${tasks.map(t => {
+        const checked = !!cloudState[stateKey(client.id,currentYear,currentMonth,t.id)];
+        return `<div class="task${checked?' done':''}" data-cid="${client.id}" data-tid="${t.id}" role="checkbox" aria-checked="${checked}" tabindex="0">
+          <div class="cb">${checked?'✓':''}</div>
+          <span class="task-name">${t.name}</span>
+          <span class="task-due${t.urgent?' urgent':''}">${t.due}</span>
+        </div>`;
+      }).join('')}
+    `;
+  });
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById(`${client.id}-total`).textContent = total;
+  document.getElementById(`${client.id}-done`).textContent  = done;
+  document.getElementById(`${client.id}-pend`).textContent  = total-done;
+  document.getElementById(`${client.id}-pct`).textContent   = pct+'%';
+  document.getElementById(`${client.id}-pbar`).style.width  = pct+'%';
+}
+
+function bindTasks() {
+  document.querySelectorAll('.task').forEach(el => {
+    const cid = el.dataset.cid;
+    const tid = el.dataset.tid;
+    const toggle = async () => {
+      const key  = stateKey(cid, currentYear, currentMonth, tid);
+      const prev = !!cloudState[key];
+      el.classList.add('saving');
+      await guardarCheck(cid, currentYear, currentMonth, tid, !prev);
+      renderClient(CLIENTS.find(c => c.id === cid));
+      bindTasks();
+    };
+    el.onclick    = toggle;
+    el.onkeydown  = e => { if(e.key===' '||e.key==='Enter'){e.preventDefault();toggle();} };
+  });
+}
+
+function renderAll() {
+  const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  document.getElementById('month-label').textContent   = MONTHS[currentMonth]+' '+currentYear;
+  document.getElementById('footer-date').textContent   = 'TributaFácil.pe — '+MONTHS[currentMonth]+' '+currentYear;
+  // Render inmediato con caché, luego sincroniza
+  cloudState = getCached();
+  CLIENTS.forEach(c => renderClient(c));
+  bindTasks();
+  cargarPeriodo(currentYear, currentMonth);
+}
+
+// ── TABS ──
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ── NAVEGACIÓN MES ──
+document.getElementById('prev').addEventListener('click', () => {
+  currentMonth--; if(currentMonth<0){currentMonth=11;currentYear--;} renderAll();
+});
+document.getElementById('next').addEventListener('click', () => {
+  currentMonth++; if(currentMonth>11){currentMonth=0;currentYear++;} renderAll();
+});
+
+// ── INICIO ──
+if (!getScriptUrl()) {
+  document.getElementById('config-banner').classList.remove('hidden');
+} else {
+  document.getElementById('config-banner').classList.add('hidden');
+}
+renderAll();
+</script>
+</body>
+</html>
