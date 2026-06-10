@@ -102,6 +102,19 @@
 
   .footer { max-width: 820px; margin: 2rem auto 0; text-align: center; font-size: 11px; color: var(--text-3); font-family: 'DM Mono', monospace; }
   .legal-note { font-size: 10px; color: var(--text-3); margin-top: 4px; }
+
+  /* ── NOTAS LIBRES ── */
+  .notas-section { margin-top: 1.5rem; }
+  .nota-row { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 6px; transition: background .12s; }
+  .nota-row:hover { background: var(--bg); }
+  .nota-num { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text-3); width: 16px; flex-shrink: 0; text-align: right; }
+  .nota-desc { flex: 3; min-width: 120px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text-1); background: var(--surface); outline: none; transition: border-color .15s; }
+  .nota-desc:focus { border-color: var(--kafka-accent); }
+  .nota-monto { flex: 1; min-width: 80px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-1); background: var(--surface); outline: none; transition: border-color .15s; text-align: right; }
+  .nota-monto:focus { border-color: var(--kafka-accent); }
+  .nota-fecha { flex: 1; min-width: 90px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-1); background: var(--surface); outline: none; transition: border-color .15s; }
+  .nota-fecha:focus { border-color: var(--kafka-accent); }
+  .nota-hint { font-size: 10px; color: var(--text-3); font-family: 'DM Mono', monospace; padding: 4px 10px 0; }
 </style>
 </head>
 <body>
@@ -157,6 +170,22 @@
     <div class="section" id="k-sec-gen"></div>
     <div class="section" id="k-sec-decl"></div>
     <div class="section" id="k-sec-fin"></div>
+
+    <div class="notas-section" id="k-sec-notas">
+      <div class="section-header" style="padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+        <span class="section-icon">📝</span>
+        <span class="section-name" style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-2);flex:1;">Notas y deudas pendientes</span>
+      </div>
+      <div style="display:flex;gap:8px;padding:0 10px 4px;font-size:10px;font-family:'DM Mono',monospace;color:var(--text-3);">
+        <span style="flex:3;min-width:120px;">Descripción</span>
+        <span style="flex:1;min-width:80px;text-align:right;">Monto (S/)</span>
+        <span style="flex:1;min-width:90px;">Vence</span>
+      </div>
+      <div class="nota-row"><span class="nota-num">1</span><input class="nota-desc" data-nota="k_nota1_desc" placeholder="Ej: IGV Período Mar. 2026" /><input class="nota-monto" data-nota="k_nota1_monto" placeholder="0.00" /><input class="nota-fecha" data-nota="k_nota1_fecha" placeholder="DD/MM/AAAA" /></div>
+      <div class="nota-row"><span class="nota-num">2</span><input class="nota-desc" data-nota="k_nota2_desc" placeholder="Ej: IGV Período Abr. 2026" /><input class="nota-monto" data-nota="k_nota2_monto" placeholder="0.00" /><input class="nota-fecha" data-nota="k_nota2_fecha" placeholder="DD/MM/AAAA" /></div>
+      <div class="nota-row"><span class="nota-num">3</span><input class="nota-desc" data-nota="k_nota3_desc" placeholder="Nota libre..." /><input class="nota-monto" data-nota="k_nota3_monto" placeholder="0.00" /><input class="nota-fecha" data-nota="k_nota3_fecha" placeholder="DD/MM/AAAA" /></div>
+      <div class="nota-hint" id="k-nota-status"></div>
+    </div>
   </div>
 
   <!-- FACTOS -->
@@ -349,6 +378,7 @@ async function cargarPeriodo(y, m) {
     Object.assign(cloudState, data);
     setCached(cloudState);
     setSyncStatus('ok','Sincronizado ✓');
+    cargarNotas(y, m);
   } catch(e) {
     // Si falla red, usamos caché local
     cloudState = getCached();
@@ -437,6 +467,7 @@ function renderAll() {
   CLIENTS.forEach(c => renderClient(c));
   bindTasks();
   cargarPeriodo(currentYear, currentMonth);
+  setTimeout(() => { cargarNotas(currentYear, currentMonth); bindNotas(); }, 600);
 }
 
 // ── TABS ──
@@ -456,6 +487,56 @@ document.getElementById('prev').addEventListener('click', () => {
 document.getElementById('next').addEventListener('click', () => {
   currentMonth++; if(currentMonth>11){currentMonth=0;currentYear++;} renderAll();
 });
+
+
+// ══════════════════════════════════════════════
+//  NOTAS LIBRES — KAFKA
+// ══════════════════════════════════════════════
+const NOTA_FIELDS = [
+  'k_nota1_desc','k_nota1_monto','k_nota1_fecha',
+  'k_nota2_desc','k_nota2_monto','k_nota2_fecha',
+  'k_nota3_desc','k_nota3_monto','k_nota3_fecha',
+];
+
+function notaStorageKey(campo, y, m) { return `nota_${campo}_${y}_${m}`; }
+
+function cargarNotas(y, m) {
+  NOTA_FIELDS.forEach(campo => {
+    const el = document.querySelector(`[data-nota="${campo}"]`);
+    if (!el) return;
+    const key = notaStorageKey(campo, y, m);
+    const val = cloudState[key];
+    el.value = (val !== undefined && val !== false) ? val : '';
+  });
+}
+
+let notaTimers = {};
+async function guardarNota(campo, valor) {
+  const key = notaStorageKey(campo, currentYear, currentMonth);
+  cloudState[key] = valor;
+  setCached(cloudState);
+  const url = getScriptUrl();
+  if (!url) return;
+  const statusEl = document.getElementById('k-nota-status');
+  if (statusEl) statusEl.textContent = 'Guardando...';
+  try {
+    await fetch(`${url}?action=set&key=${encodeURIComponent(key)}&value=${encodeURIComponent(valor)}`, {mode:'cors'});
+    if (statusEl) statusEl.textContent = 'Guardado ✓ — ' + new Date().toLocaleTimeString('es-PE');
+  } catch(e) {
+    if (statusEl) statusEl.textContent = 'Guardado local (sin conexión)';
+  }
+}
+
+function bindNotas() {
+  NOTA_FIELDS.forEach(campo => {
+    const el = document.querySelector(`[data-nota="${campo}"]`);
+    if (!el) return;
+    el.oninput = () => {
+      clearTimeout(notaTimers[campo]);
+      notaTimers[campo] = setTimeout(() => guardarNota(campo, el.value), 800);
+    };
+  });
+}
 
 // ── INICIO ──
 if (!getScriptUrl()) {
