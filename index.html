@@ -375,7 +375,10 @@ async function cargarPeriodo(y, m) {
     const r = await fetch(`${url}?action=get&year=${y}&month=${m}`, {mode:'cors'});
     const data = await r.json();
     // data = { "k_2026_4_gen1": true, ... }
-    Object.assign(cloudState, data);
+    // Merge data: para notas (strings) y checks (booleans)
+    for (const [k, v] of Object.entries(data)) {
+      cloudState[k] = v;
+    }
     setCached(cloudState);
     setSyncStatus('ok','Sincronizado ✓');
     cargarNotas(y, m);
@@ -516,11 +519,15 @@ async function guardarNota(campo, valor) {
   cloudState[key] = valor;
   setCached(cloudState);
   const url = getScriptUrl();
-  if (!url) return;
   const statusEl = document.getElementById('k-nota-status');
+  if (!url) {
+    if (statusEl) statusEl.textContent = 'Guardado local';
+    return;
+  }
   if (statusEl) statusEl.textContent = 'Guardando...';
   try {
-    await fetch(`${url}?action=set&key=${encodeURIComponent(key)}&value=${encodeURIComponent(valor)}`, {mode:'cors'});
+    const body = new URLSearchParams({ action: 'set', key: key, value: valor });
+    await fetch(url, { method: 'POST', body: body });
     if (statusEl) statusEl.textContent = 'Guardado ✓ — ' + new Date().toLocaleTimeString('es-PE');
   } catch(e) {
     if (statusEl) statusEl.textContent = 'Guardado local (sin conexión)';
