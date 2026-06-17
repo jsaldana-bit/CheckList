@@ -171,7 +171,7 @@
     <div class="section" id="k-sec-decl"></div>
     <div class="section" id="k-sec-fin"></div>
 
-    <div class="notas-section" id="k-sec-notas">
+<div class="notas-section" id="k-sec-notas">
       <div class="section-header" style="padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:6px;display:flex;align-items:center;gap:8px;">
         <span class="section-icon">📝</span>
         <span class="section-name" style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-2);flex:1;">Notas y deudas pendientes</span>
@@ -181,11 +181,14 @@
         <span style="flex:1;min-width:80px;text-align:right;">Monto (S/)</span>
         <span style="flex:1;min-width:90px;">Vence</span>
       </div>
-      <div class="nota-row"><span class="nota-num">1</span><input class="nota-desc" data-nota="k_nota1_desc" placeholder="Ej: IGV Período Mar. 2026" /><input class="nota-monto" data-nota="k_nota1_monto" placeholder="0.00" /><input class="nota-fecha" data-nota="k_nota1_fecha" placeholder="DD/MM/AAAA" /></div>
-      <div class="nota-row"><span class="nota-num">2</span><input class="nota-desc" data-nota="k_nota2_desc" placeholder="Ej: IGV Período Abr. 2026" /><input class="nota-monto" data-nota="k_nota2_monto" placeholder="0.00" /><input class="nota-fecha" data-nota="k_nota2_fecha" placeholder="DD/MM/AAAA" /></div>
+      <div class="nota-row"><span class="nota-num">1</span><input class="nota-desc" data-nota="k_nota1_desc" placeholder="Nota libre..." /><input class="nota-monto" data-nota="k_nota1_monto" placeholder="0.00" /><input class="nota-fecha" data-nota="k_nota1_fecha" placeholder="DD/MM/AAAA" /></div>
+      <div class="nota-row"><span class="nota-num">2</span><input class="nota-desc" data-nota="k_nota2_desc" placeholder="Nota libre..." /><input class="nota-monto" data-nota="k_nota2_monto" placeholder="0.00" /><input class="nota-fecha" data-nota="k_nota2_fecha" placeholder="DD/MM/AAAA" /></div>
       <div class="nota-row"><span class="nota-num">3</span><input class="nota-desc" data-nota="k_nota3_desc" placeholder="Nota libre..." /><input class="nota-monto" data-nota="k_nota3_monto" placeholder="0.00" /><input class="nota-fecha" data-nota="k_nota3_fecha" placeholder="DD/MM/AAAA" /></div>
+      <div class="nota-row"><span class="nota-num">4</span><input class="nota-desc" data-nota="k_nota4_desc" placeholder="Nota libre..." /><input class="nota-monto" data-nota="k_nota4_monto" placeholder="0.00" /><input class="nota-fecha" data-nota="k_nota4_fecha" placeholder="DD/MM/AAAA" /></div>
+      <div class="nota-row"><span class="nota-num">5</span><input class="nota-desc" data-nota="k_nota5_desc" placeholder="Nota libre..." /><input class="nota-monto" data-nota="k_nota5_monto" placeholder="0.00" /><input class="nota-fecha" data-nota="k_nota5_fecha" placeholder="DD/MM/AAAA" /></div>
       <div class="nota-hint" id="k-nota-status"></div>
     </div>
+
   </div>
 
   <!-- FACTOS -->
@@ -202,6 +205,22 @@
     <div class="section" id="f-sec-gen"></div>
     <div class="section" id="f-sec-decl"></div>
     <div class="section" id="f-sec-fin"></div>
+
+    <div class="notas-section" id="f-sec-notas">
+      <div class="section-header" style="padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+        <span class="section-icon">📝</span>
+        <span class="section-name" style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-2);flex:1;">Notas y deudas pendientes</span>
+      </div>
+      <div style="display:flex;gap:8px;padding:0 10px 4px;font-size:10px;font-family:'DM Mono',monospace;color:var(--text-3);">
+        <span style="flex:3;min-width:120px;">Descripción</span>
+        <span style="flex:1;min-width:80px;text-align:right;">Monto (S/)</span>
+        <span style="flex:1;min-width:90px;">Vence</span>
+      </div>
+      <div class="nota-row"><span class="nota-num">1</span><input class="nota-desc" data-nota="f_nota1_desc" placeholder="Nota libre..." /><input class="nota-monto" data-nota="f_nota1_monto" placeholder="0.00" /><input class="nota-fecha" data-nota="f_nota1_fecha" placeholder="DD/MM/AAAA" /></div>
+      <div class="nota-row"><span class="nota-num">2</span><input class="nota-desc" data-nota="f_nota2_desc" placeholder="Nota libre..." /><input class="nota-monto" data-nota="f_nota2_monto" placeholder="0.00" /><input class="nota-fecha" data-nota="f_nota2_fecha" placeholder="DD/MM/AAAA" /></div>
+      <div class="nota-row"><span class="nota-num">3</span><input class="nota-desc" data-nota="f_nota3_desc" placeholder="Nota libre..." /><input class="nota-monto" data-nota="f_nota3_monto" placeholder="0.00" /><input class="nota-fecha" data-nota="f_nota3_fecha" placeholder="DD/MM/AAAA" /></div>
+      <div class="nota-hint" id="f-nota-status"></div>
+    </div>
   </div>
 
   <!-- CARLOS -->
@@ -216,6 +235,22 @@
       </div>
     </div>
     <div class="section" id="c-sec-decl"></div>
+
+    <div class="notas-section" id="c-sec-notas">
+      <div class="section-header" style="padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+        <span class="section-icon">📝</span>
+        <span class="section-name" style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-2);flex:1;">Notas y deudas pendientes</span>
+      </div>
+      <div style="display:flex;gap:8px;padding:0 10px 4px;font-size:10px;font-family:'DM Mono',monospace;color:var(--text-3);">
+        <span style="flex:3;min-width:120px;">Descripción</span>
+        <span style="flex:1;min-width:80px;text-align:right;">Monto (S/)</span>
+        <span style="flex:1;min-width:90px;">Vence</span>
+      </div>
+      <div class="nota-row"><span class="nota-num">1</span><input class="nota-desc" data-nota="c_nota1_desc" placeholder="Nota libre..." /><input class="nota-monto" data-nota="c_nota1_monto" placeholder="0.00" /><input class="nota-fecha" data-nota="c_nota1_fecha" placeholder="DD/MM/AAAA" /></div>
+      <div class="nota-row"><span class="nota-num">2</span><input class="nota-desc" data-nota="c_nota2_desc" placeholder="Nota libre..." /><input class="nota-monto" data-nota="c_nota2_monto" placeholder="0.00" /><input class="nota-fecha" data-nota="c_nota2_fecha" placeholder="DD/MM/AAAA" /></div>
+      <div class="nota-row"><span class="nota-num">3</span><input class="nota-desc" data-nota="c_nota3_desc" placeholder="Nota libre..." /><input class="nota-monto" data-nota="c_nota3_monto" placeholder="0.00" /><input class="nota-fecha" data-nota="c_nota3_fecha" placeholder="DD/MM/AAAA" /></div>
+      <div class="nota-hint" id="c-nota-status"></div>
+    </div>
   </div>
 </div>
 
@@ -495,11 +530,21 @@ document.getElementById('next').addEventListener('click', () => {
 // ══════════════════════════════════════════════
 //  NOTAS LIBRES — KAFKA
 // ══════════════════════════════════════════════
+function generarCamposNota(prefix, n) {
+  const campos = [];
+  for (let i = 1; i <= n; i++) {
+    campos.push(`${prefix}_nota${i}_desc`, `${prefix}_nota${i}_monto`, `${prefix}_nota${i}_fecha`);
+  }
+  return campos;
+}
+
 const NOTA_FIELDS = [
-  'k_nota1_desc','k_nota1_monto','k_nota1_fecha',
-  'k_nota2_desc','k_nota2_monto','k_nota2_fecha',
-  'k_nota3_desc','k_nota3_monto','k_nota3_fecha',
+  ...generarCamposNota('k', 5),
+  ...generarCamposNota('f', 3),
+  ...generarCamposNota('c', 3),
 ];
+
+const NOTA_STATUS_IDS = ['k-nota-status', 'f-nota-status', 'c-nota-status'];
 
 function notaStorageKey(campo, y, m) { return `nota_${campo}_${y}_${m}`; }
 
@@ -514,12 +559,17 @@ function cargarNotas(y, m) {
 }
 
 let notaTimers = {};
+function statusIdParaCampo(campo) {
+  const prefix = campo.split('_')[0]; // 'k', 'f', o 'c'
+  return prefix + '-nota-status';
+}
+
 async function guardarNota(campo, valor) {
   const key = notaStorageKey(campo, currentYear, currentMonth);
   cloudState[key] = valor;
   setCached(cloudState);
   const url = getScriptUrl();
-  const statusEl = document.getElementById('k-nota-status');
+  const statusEl = document.getElementById(statusIdParaCampo(campo));
   if (!url) {
     if (statusEl) statusEl.textContent = 'Guardado local';
     return;
